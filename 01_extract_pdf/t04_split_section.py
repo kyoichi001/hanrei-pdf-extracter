@@ -167,7 +167,7 @@ def export_to_json(filename:str,data:List[HanreiSection])->None:
            # "indent":t.indent,
         })
     obj={
-        "header":{# TODO:
+        "header":{
             "words_count":texts_len_avg,#文字数
             "texts_count":texts_count,
             "texts_len_max":texts_len_max,

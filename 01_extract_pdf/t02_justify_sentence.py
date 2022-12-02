@@ -6,13 +6,13 @@ y座標が同じなら結合
 """
 
 import csv
-from typing import List, Tuple, Dict, Set,Optional
+from typing import List, Tuple, Dict, Set,Optional,Any
 import re
 import json
 
-def export_to_json(filename:str,data)->None:
+def export_to_json(filename:str,data:List[Any])->None:
     obj={
-        "header":{# TODO:
+        "header":{
             "texts_count":len(data)
         },
         "contents":data
@@ -24,12 +24,12 @@ def clean_text(txt:str)->str:
     return txt.strip().replace('\n', '').replace('\t', '').replace("（","(").replace("）",")")
 
 def main_func(data):
+    #yが小さい順（上から下）にソート
     res = sorted(data["contents"],key=lambda x: (-x["y"],x["x"]))
-    if len(res)==1:
+    if len(res)==1:#行番号やページ番号を除外したものを返す
         return [clean_text(i["text"]) for i in res if clean_text(i["text"])!="" and re.match('^[-ー \d]+$', i["text"]) == None]
-    
     i=1
-    while i<len(res):#同じy座標にあるテキストを結合（行番号(5,10,15,...)と本文の座標が同じだとエラー)
+    while i<len(res):#同じy座標にあるテキストを結合
         if res[i-1]["y"]==res[i]["y"]:
             #print("!!!!!!!!!!!!",res[i-1]["text"],res[i]["text"])
             res[i-1]["text"]+=res[i]["text"]
