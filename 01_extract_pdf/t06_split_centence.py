@@ -211,9 +211,9 @@ def export_to_json(filename:str,data)->None:
 import glob
 import os
 
-def main():
-    os.makedirs("06", exist_ok=True)
-    files = glob.glob("./05/*.json")
+def main(inputDir:str,outputDir:str):
+    os.makedirs(outputDir, exist_ok=True)
+    files = glob.glob(f"{inputDir}/*.json")
 
     for file in files:
         print(file)
@@ -223,8 +223,8 @@ def main():
         print(f"入力 {len(contents)}行")
         output_path=os.path.splitext(os.path.basename(file))[0]
         #print(f"出力 {len(container)}行")
-        export_to_json(f"./06/{output_path}",contents)
-        export_to_csv(f"./06/{output_path}",contents)
+        export_to_json(f"{outputDir}/{output_path}",contents)
+        export_to_csv(f"{outputDir}/{output_path}",contents)
         
 if __name__=="__main__":
-    main()
+    main("./05","./06")

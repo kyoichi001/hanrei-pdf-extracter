@@ -225,9 +225,9 @@ def main_func(contents,headerChecker:HeaderChecker)->List[HanreiSection]:
 import glob
 import os
 
-def main():
-    os.makedirs("04", exist_ok=True)
-    files = glob.glob("./03/*.json")
+def main(inputDir:str,outputDir:str):
+    os.makedirs(outputDir, exist_ok=True)
+    files = glob.glob(f"{inputDir}/*.json")
 
     header_file = open("./headers.json", "r", encoding="utf-8")
     headers_obj=json.load(header_file)
@@ -241,7 +241,7 @@ def main():
         container=main_func(contents,headerChecker)
         output_path=os.path.splitext(os.path.basename(file))[0]
         print(f"出力 {len(container)}行")
-        export_to_json(f"./04/{output_path}.json",container)
+        export_to_json(f"{outputDir}/{output_path}.json",container)
 
 if __name__=="__main__":
-    main()
+    main("./03","./04")

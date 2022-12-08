@@ -43,9 +43,9 @@ def main_func(data):
 import glob
 import os
 
-def main():
-    os.makedirs("02", exist_ok=True)
-    files = glob.glob("./01/*.json")
+def main(inputDir:str,outputDir:str):
+    os.makedirs(outputDir, exist_ok=True)
+    files = glob.glob(f"{inputDir}/*.json")
 
     for file in files:
         print(file)
@@ -57,7 +57,7 @@ def main():
             output.extend(main_func(page))
         output_path=os.path.splitext(os.path.basename(file))[0]
         #print(f"出力 {len(container)}行")
-        export_to_json(f"./02/{output_path}.json",output)
+        export_to_json(f"./{outputDir}/{output_path}.json",output)
 
 if __name__=="__main__":
-    main()
+    main("./01","./02")
