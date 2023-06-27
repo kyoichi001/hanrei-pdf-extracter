@@ -1,6 +1,6 @@
 
 import t06_split_centence
-texts=[
+texts = [
     "「XXX X)XXXX。」XXX",
     "「XXXX」XXX(XXXX)",
     "(XXX(XXX)XXX)(XXX)",
@@ -16,5 +16,5 @@ texts=[
 
 for text in texts:
     print("======================")
-    a=t06_split_centence.extract_kakko(text)
-    print(text," : ",a)
+    a = t06_split_centence.extract_kakko(text)
+    print(text, " : ", a)

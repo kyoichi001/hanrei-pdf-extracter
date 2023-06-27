@@ -64,21 +64,13 @@ import glob
 import os
 import json
 
-def main():
-    args = sys.argv
-
-    os.makedirs("01", exist_ok=True)
-
-    if len(args)==1:
-        files = glob.glob("./pdf/*.pdf")
-        for file in files:
-            print(file)
-            output_path=os.path.splitext(os.path.basename(file))[0]
-            export_to_json(f"./01/{output_path}.json",pdf_to_cell(file))
-    else:
-        print(args[1])
-        #for i in pdf_to_cell(args[1]):
-        #    print(i)
+def main(inputDir:str,outputDir:str):
+    os.makedirs(outputDir, exist_ok=True)
+    files = glob.glob(f"{inputDir}/*.pdf")
+    for file in files:
+        print(file)
+        output_path=os.path.splitext(os.path.basename(file))[0]
+        export_to_json(f"./{outputDir}/{output_path}.json",pdf_to_cell(file))
 
 if __name__=="__main__":
-    main()
+    main("./pdf","./01")

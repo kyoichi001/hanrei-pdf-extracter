@@ -81,16 +81,16 @@ def export_to_json(filename:str,contents)->None:
             "contents":contents
         }, f, ensure_ascii=False, indent=2)
 
-def main():
-    os.makedirs("05", exist_ok=True)
-    files = glob.glob("./04/*.json")
+def main(inputDir:str,outputDir:str):
+    os.makedirs(outputDir, exist_ok=True)
+    files = glob.glob(f"{inputDir}/*.json")
     for file in files:
         print(file)
         contents = open(file, "r", encoding="utf-8")
         contents=json.load(contents)
         contents=main_func(contents)
         output_path=os.path.splitext(os.path.basename(file))[0]
-        export_to_json(f"./05/{output_path}.json",contents)
+        export_to_json(f"{outputDir}/{output_path}.json",contents)
 
 if __name__=="__main__":
-    main()
+    main("./04","./05")
