@@ -33,53 +33,88 @@ def split_blacket(str1:str,str2:str,level:int):
     return str1+"".join(ls[:level]),"".join(ls[level:])
 
 def main_func(data):
-    res=[]
-    for content in data["contents"]:
-        if content["type"]=="":continue
-        flag=False
-        header=content["header"]
-        first_line=content["first_line"]
-        text=content["text"]
+    data_count=len(data["contents"])
+    res=[{} for i in range(data_count)]
+    answers:List[str]=[{} for i in range(data_count)]
+    index=0
+    while index<data_count:
+        c=data["contents"][index]
+        if c["type"]=="":
+            index+=1
+            continue
+        flag=""
+        header=c["header"]
+        first_line=c["first_line"]
+        text=c["text"]
         lv=blacket_level(first_line)
         if lv!=0:
             first_line,text=split_blacket(first_line,text,lv)
         while True:
-            print("===========================================")
+            print(f"================== {index} / {data_count} =========================")
             print("header:     ",header)
             print("first_line: ",first_line)
             print("text:       ",text)
-            ans = input("これはheader_text? (y/n)")
-            if ans=="y":
-                flag=True
-                break
-            elif ans=="n":
-                flag=False
+            ans = input("これはheader_text? (y(yes) Y(yes(first_line+text)) / n(no) / u(undo))")
+            if ans=="y" or ans=="Y" or ans=="n" or ans=="u":
+                flag=ans
                 break
             else:
                 print("error やり直し")
         obj={}
-        if flag:
+        if flag=="y":
             obj={
-                "type": content["type"],
+                "type": c["type"],
                 "header": header,
                 "header_text":first_line,
                 "text":text
             }
-        else:
+        elif flag=="Y":
             obj={
-                "type": content["type"],
+                "type": c["type"],
+                "header": header,
+                "header_text":first_line+text,
+                "text":""
+            }
+        elif flag=="n":
+            obj={
+                "type": c["type"],
                 "header": header,
                 "header_text":"",
                 "text":first_line+text
             }
-        res.append(obj)
-    return res
+        elif flag=="u":
+            index-=1
+            continue
+        res[index]=obj
+        answers[index]=flag
+        index+=1
+    res=[i for i in res if "type" in i]
+    answers=[i for i in answers if i!=""]
+    return res,answers
 
-def export_to_json(filename:str,contents)->None:
+def export_to_json(filename:str,contents,answers:List[str])->None:
     with open(filename, 'w', encoding='utf8', newline='') as f:
         json.dump({
             "contents":contents
         }, f, ensure_ascii=False, indent=2)
+
+    import csv
+
+    with open(filename+"_answers.csv", 'w', encoding='utf8', newline='') as f:
+        writer = csv.writer(f)
+        for row in answers:
+            if row=="":continue # c["type"]=="" のとき飛ばされた列を無視
+            writer.writerow(row)
+
+    with open(filename+"_texts.csv", 'w', encoding='utf8', newline='') as f:
+        writer = csv.writer(f)
+        writer.writerow(["id","header","header_text","text"])
+        id=0
+        for content in contents:
+            writer.writerow([id,content["header"],content["header_text"],content["text"]])
+            id+=1
+    
+    
 
 def main(inputDir:str,outputDir:str):
     os.makedirs(outputDir, exist_ok=True)
@@ -88,9 +123,9 @@ def main(inputDir:str,outputDir:str):
         print(file)
         contents = open(file, "r", encoding="utf-8")
         contents=json.load(contents)
-        contents=main_func(contents)
+        contents,answers=main_func(contents)
         output_path=os.path.splitext(os.path.basename(file))[0]
-        export_to_json(f"{outputDir}/{output_path}.json",contents)
+        export_to_json(f"{outputDir}/{output_path}.json",contents,answers)
 
 if __name__=="__main__":
     main("./04","./05")

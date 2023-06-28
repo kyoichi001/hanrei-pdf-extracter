@@ -7,7 +7,6 @@ import json
 from typing import List, Tuple, Dict, Set
 import re
 
-
 def extract_kakko(text: str) -> List[str]:
     """
     カッコの入っている文からカッコとそれ以外を抽出
@@ -90,6 +89,7 @@ def text_to_data(inputs: List[str]):
     selifs = []
     blackets = []
     text = ""
+    raw_text=""
     current_selif_count = 0
     for input in inputs:
         if input[0] == "「":
@@ -106,60 +106,74 @@ def text_to_data(inputs: List[str]):
             })
         else:
             text += input
+        raw_text+=input
     return {
         "text": text,
         "selifs": selifs,
-        "blackets": blackets
+        "blackets": blackets,
+        "raw_text":raw_text,
     }
 
 
 def export_to_csv(filename: str, data) -> None:
-    csv_result = [["id", "text_id", "header_type", "content"]]
+    csv_result = [["id", "header", "header_text", "content"]]
+    csv_raw_result = [["id", "header", "header_text", "content"]]
     text_id = 0
+    raw_text_id=0
     for t in data["contents"]:
         if t["header"] == "":
             continue
+        if t["text"]=="":
+            csv_result.append([text_id, t["header"],t["header_text"] ,""])
+            csv_raw_result.append([raw_text_id, t["header"],t["header_text"] ,""])
+            raw_text_id+=1
+            text_id+=1
         text_inputs = []
         for i in split_texts(t["text"]):
             if i[-1] == "。" or i[-1] == "．":
                 text_inputs.append(i)
                 # 文が終わったときにデータを整形し、 text_to_data を呼ぶ
                 dat = text_to_data(text_inputs)
-                csv_result.append(
-                    [text_id, t["type"], t["header"], dat["text"]])
+                csv_result.append([text_id, t["header"],t["header_text"] ,dat["text"]])
+                csv_raw_result.append([raw_text_id, t["header"],t["header_text"] ,dat["raw_text"]])
                 text_id += 1
                 # datのselifs, blacketsにtarget_text_idを付与。
                 # selifs, blacketsにtext_idを付与。
                 for selif in dat["selifs"]:
-                    csv_result.append(
-                        [text_id, t["type"], t["header"], selif["content"]])
+                    csv_result.append([text_id, t["header"],t["header_text"] , selif["content"]])
                     text_id += 1
                 for blacket in dat["blackets"]:
-                    csv_result.append(
-                        [text_id, t["type"], t["header"], blacket["content"]])
+                    csv_result.append([text_id, t["header"],t["header_text"] , blacket["content"]])
                     text_id += 1
                 text_inputs = []
+                raw_text_id+=1
             else:
                 text_inputs.append(i)  # 文を蓄積する
         dat = text_to_data(text_inputs)  # 文が終わったときにデータを整形し、 text_to_data を呼ぶ
         if dat["text"] != "":
-            csv_result.append([text_id, t["type"], t["header"], dat["text"]])
+            csv_result.append([text_id, t["header"],t["header_text"] , dat["text"]])
+            csv_raw_result.append([raw_text_id, t["header"],t["header_text"] , dat["raw_text"]])
             text_id += 1
             # datのselifs, blacketsにtarget_text_idを付与。
             # selifs, blacketsにtext_idを付与。
             for selif in dat["selifs"]:
                 csv_result.append(
-                    [text_id, t["type"], t["header"], selif["content"]])
+                    [text_id, t["header"],t["header_text"] ,selif["content"]])
                 text_id += 1
             for blacket in dat["blackets"]:
                 csv_result.append(
-                    [text_id, t["type"], t["header"], blacket["content"]])
+                    [text_id, t["header"],t["header_text"] , blacket["content"]])
                 text_id += 1
+            raw_text_id+=1
     import csv
 
     with open(filename+".csv", 'w', encoding='utf8', newline='') as f:
         writer = csv.writer(f)
         for row in csv_result:
+            writer.writerow(row)
+    with open(filename+"_raw.csv", 'w', encoding='utf8', newline='') as f:
+        writer = csv.writer(f)
+        for row in csv_raw_result:
             writer.writerow(row)
 
 

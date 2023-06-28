@@ -211,13 +211,25 @@ def main_func(contents,headerChecker:HeaderChecker)->List[HanreiSection]:
                 #if txt_obj.header_type=="th_full_num" or txt_obj.header_type=="th_kanji_num":
                 #    headerList.reset()#第nのとき、リセットする
                 headerList.add_header(txt_obj)
-                if len(t)>0:first_line=t[0]
-                text="".join(t[1:])
+                if len(t)==0: #もしそのヘッダー候補にテキストがなければ、次のヘッダー候補がヘッダーでないとき、その文がfirst_lineになる・・・
+                    first_line=""
+                    text=""
+                else:
+                    first_line=t[0]
+                    text="".join(t[1:])
                 current_header=txt_obj
             else:
-                text+=header+"".join(t)
+                if first_line=="" and len(t)>0:
+                    first_line=header+t[0]
+                    text="".join(t[1:])
+                else:
+                    text+=header+"".join(t)
         else:
-            text+=header+"".join(t)
+            if first_line=="" and len(t)>0:
+                first_line=header+t[0]
+                text="".join(t[1:])
+            else:
+                text+=header+"".join(t)
         count+=1
     container.append(HanreiSection(current_header,text,headerList.current_indent(),first_line))
     return container
