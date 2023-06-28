@@ -1,0 +1,12 @@
+__pycache__/
+cabocha-0.69/
+pdf/
+gomi/
+*.code-workspace
+.vscode/
+old/
+*.pdf
+data/
+json/
+*_hanrei.json
+*_hanrei.csv
