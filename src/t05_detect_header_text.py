@@ -13,7 +13,7 @@ from typing import List, Tuple, Dict, Set,Optional
 import re
 import json
 
-def blacket_level(str:str)->bool:
+def blacket_level(str:str)->int:
     """
     
     """

@@ -1,10 +1,9 @@
 import glob
 import os
 import csv
-from typing import List, Tuple, Dict, Set, Optional
+from typing import List, Tuple, Dict, Set, Optional,Final,Union
 import re
 import json
-from typing import List, Tuple, Dict, Set
 import re
 
 def extract_kakko(text: str) -> List[str]:
@@ -19,7 +18,7 @@ def extract_kakko(text: str) -> List[str]:
 
     res_wokakko = ""
     res_kakko = ""
-    pair_kakko = {"(": ")", ")": "(", "「": "」", "」": "「"}
+    pair_kakko:Final = {"(": ")", ")": "(", "「": "」", "」": "「"}
     kakko_count = {"(": 0, "「": 0}
     target_kakko = ""
     res = []
@@ -38,8 +37,7 @@ def extract_kakko(text: str) -> List[str]:
             if kakko_count[pair_kakko[text[i]]] == 0 and pair_kakko[text[i]] == target_kakko:
                 res.append(res_kakko+text[i])
                 res_kakko = ""
-                for i in kakko_count:
-                    kakko_count[i] = 0
+                kakko_count = {"(": 0, "「": 0}
                 target_kakko = ""
                 continue
         if text[i] == "(" or text[i] == "「":
@@ -64,7 +62,7 @@ def split_texts(text: str) -> List[str]:
         a = re.sub("。([^」\\)〕])", "。$\\1", text)
         texts_dat = a.split("$")
         if len(texts_dat) == 0:
-            return text
+            return [text]
         return texts_dat
 
     texts = extract_kakko(text)  # 文からカッコとそうでないのを区切る。配列を返す
@@ -116,8 +114,8 @@ def text_to_data(inputs: List[str]):
 
 
 def export_to_csv(filename: str, data) -> None:
-    csv_result = [["id", "header", "header_text", "content"]]
-    csv_raw_result = [["id", "header", "header_text", "content"]]
+    csv_result:list[list[Union[int,str]]] = [["id", "header", "header_text", "content"]]
+    csv_raw_result:list[list[Union[int,str]]] = [["id", "header", "header_text", "content"]]
     text_id = 0
     raw_text_id=0
     for t in data["contents"]:
