@@ -23,7 +23,7 @@ def export_to_json(filename:str,data)->None:
 def main_func(texts:List[str]):
     text={"header":"","texts":[]}
     res=[]
-    main_section_headers=["判決","判 決","主文","主 文","事実及び理由","事 実 及 び 理 由","事  実  及  び  理  由"]
+    main_section_headers=["判決","主文","事実及び理由"]
     header_file = open("./headers.json", "r", encoding="utf-8")
     headers_obj=json.load(header_file)
     header_others=[rule for rule in headers_obj["rules"] if "order" in rule and rule["order"]==False]
@@ -31,7 +31,8 @@ def main_func(texts:List[str]):
     print(header_others)
     count=0
     for t in texts:
-        if t in main_section_headers:# 主文、事実及び理由の場合
+        t_=t.replace('　', '').replace('\t', '').replace(' ', '')
+        if t_ in main_section_headers:# 主文、事実及び理由の場合
             res.append(text)
             text={"header":t.replace(" ",""),"texts":[]}
             continue
