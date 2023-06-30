@@ -24,7 +24,7 @@ def main_func(texts:List[str]):
     text={"header":"","texts":[]}
     res=[]
     main_section_headers=["判決","主文","事実及び理由"]
-    header_file = open("./headers.json", "r", encoding="utf-8")
+    header_file = open("./rules/headers.json", "r", encoding="utf-8")
     headers_obj=json.load(header_file)
     header_others=[rule for rule in headers_obj["rules"] if "order" in rule and rule["order"]==False]
     header_text=""
