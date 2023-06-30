@@ -21,6 +21,7 @@ def main_func(data):
         res.append({
             "type":content["type"],
             "header":content["header"],
+            "header_text":"",
             "text":content["first_line"]+content["text"]
         })
     return res

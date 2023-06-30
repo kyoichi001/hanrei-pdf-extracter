@@ -1,0 +1,67 @@
+{
+    "point": [
+        {
+            "regex": "(?P<gengo>昭和|平成|令和)(?P<year>\\d+|元)年(?P<month>\\d+)月(?P<day>\\d+)日"
+        },
+        {
+            "regex": "(?P<gengo>昭和|平成|令和)(?P<year>\\d+|元)年(?P<month>\\d+)月"
+        },
+        {
+            "regex": "(?P<gengo>昭和|平成|令和)(?P<year>\\d+|元)年"
+        },
+        {
+            "regex": "同年(?P<month>\\d+)月(?P<day>\\d+)日",
+            "same": "year"
+        },
+        {
+            "regex": "同年(?P<month>\\d+)月",
+            "same": "year"
+        },
+        {
+            "regex": "同年",
+            "same": "year"
+        },
+        {
+            "regex": "同月(?P<day>\\d+)日",
+            "same": "month"
+        },
+        {
+            "regex": "同月",
+            "same": "month"
+        },
+        {
+            "regex": "同日",
+            "same": "day"
+        }
+    ],
+    "begin": [
+        {
+            "regex": "^から$"
+        },
+        {
+            "regex": "以降"
+        }
+    ],
+    "end": [
+        {
+            "regex": "^まで$"
+        },
+        {
+            "regex": "以前"
+        },
+        {
+            "regex": "^にかけて$"
+        }
+    ],
+    "other": [
+        {
+            "regex": "^間$"
+        },
+        {
+            "regex": "頃"
+        },
+        {
+            "regex": "中頃"
+        }
+    ]
+}
