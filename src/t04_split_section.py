@@ -1,5 +1,5 @@
 import csv
-from typing import List, Tuple, Dict, Set,Optional,TypedDict
+from typing import List, Tuple, Dict, Set,Optional,TypedDict,Any
 import re
 import json
 
@@ -40,7 +40,6 @@ class HeaderRule:
     def get_index(self,text:str)->Optional[int]:
         if self.data is None:return None
         return self.data.index(text)
-
 
 class HeaderChecker:
     """
@@ -119,7 +118,7 @@ class HeaderList:
         if self.header_types[-1]==header["header_type"]: #headerが直前のheaderと同じタイプだったら
             if self._ignore_order(header):return True
             return target_index==self.header_indexes[-1]+1 #headerが直前のheaderの次に位置するものか
-        if self._has_before(header["header"]): #headerが以前に同じタイプが登録されてたら
+        if self._has_before(header["header_type"]): #headerが以前に同じタイプが登録されてたら
             if self._ignore_order(header):return True
             index=self.header_types.index(header["header_type"])
             return target_index==self.header_indexes[index]+1 #headerが以前のheaderの次に位置するものか
@@ -154,74 +153,39 @@ class HeaderList:
         self.header_indexes.clear()
         self.header_types.clear()
 
-def export_to_json(filename:str,data:List[HanreiSection])->None:
-    contents=[]
-    texts_count=0
-    texts_len_max=0
-    texts_len_avg=0
-    for t in data:
-        l=len(t["text"])
-        texts_count+=1
-        texts_len_max=max(texts_len_max,l)
-        texts_len_avg+=l
-        contents.append({
-            "type":t["header"]["header_type"],
-            "header":t["header"]["header"],
-            "first_line":t["first_line"],
-            "text":t["text"]
-           # "indent":t.indent,
-        })
+def export_to_json(filename:str,data)->None:
     obj={
-        "header":{
-            "words_count":texts_len_avg,#文字数
-            "texts_count":texts_count,
-            "texts_len_max":texts_len_max,
-            "texts_len_avg":texts_len_avg/texts_count,
-        },
-        "contents":contents
+        "contents":data
     }
     with open(filename, 'w', encoding='utf8', newline='') as f:
         json.dump(obj, f, ensure_ascii=False, indent=2)
 
-def main_func(contents,headerChecker:HeaderChecker)->List[HanreiSection]:
+def detect_header(sections,headerChecker:HeaderChecker)->List[Any]:
     text=""
     current_header:HanreiHeader={"header_type":"","header":""}
     headerList = HeaderList(headerChecker)
-    container:List[HanreiSection]=[]
-    main_section_headers=["判決","主文","事実及び理由"]
+    res:List[Any]=[]
     first_line=""
-    for content in contents:
+    for content in sections:
         header=content["header"]
         t=content["texts"]
-        indent=headerList.current_indent()
-        if header in main_section_headers:# 主文、事実及び理由の場合
-            container.append({"header":current_header,"text":text,"indent":indent,"first_line":first_line})
-            headerList.reset()
-            container.append({"header":{"header_type":"main_section","header":header},"text":"_","indent":0,"first_line":""})
-            text=""
-            first_line=""
-            current_header={"header_type":"","header":""}
-            continue
         if headerChecker.match_header(header):# 箇条書きなら改行
-            #print(header)
-            #print(text)
             txt_obj,txt=headerChecker.get_header_type(header)
             #抽出されたテキストが次の箇条書きでかつ、前の文を加味したとき正しいか
             flag1=headerList.is_next_header(txt_obj)
             flag2=headerChecker.is_collect(txt_obj["header_type"],text)
             #flag3=headerChecker.is_collect2(txt_obj.header,txt)
             if flag1 and flag2:
-                container.append({"header":current_header,"text":text,"indent":indent,"first_line":first_line})
-                #if txt_obj.header_type=="th_full_num" or txt_obj.header_type=="th_kanji_num":
-                #    headerList.reset()#第nのとき、リセットする
+                if current_header["header_type"]!="":
+                    res.append({"type":current_header["header_type"],"header":current_header["header"],"first_line":first_line,"text":text,"indent":headerList.current_indent()})
                 headerList.add_header(txt_obj)
+                current_header=txt_obj
                 if len(t)==0: #もしそのヘッダー候補にテキストがなければ、次のヘッダー候補がヘッダーでないとき、その文がfirst_lineになる・・・
                     first_line=""
                     text=""
                 else:
                     first_line=t[0]
                     text="".join(t[1:])
-                current_header=txt_obj
             else:
                 if first_line=="" and len(t)>0:
                     first_line=header+t[0]
@@ -234,8 +198,39 @@ def main_func(contents,headerChecker:HeaderChecker)->List[HanreiSection]:
                 text="".join(t[1:])
             else:
                 text+=header+"".join(t)
-    container.append({"header":current_header,"text":text,"indent":headerList.current_indent(),"first_line":first_line})
-    return container
+    res.append({"type":current_header["header_type"],"header":current_header["header"],"first_line":first_line,"text":text,"indent":headerList.current_indent()})
+    return res
+
+def main_func(contents,headerChecker:HeaderChecker):
+    res:Any={
+        "signature":[],
+        "judgement":{},
+        "main_text":{},
+        "fact_reason":{},
+    }
+    signature=contents["signature"]
+    judgement=contents["judgement"]
+    main_text=contents["main_text"]
+    fact_reason=contents["fact_reason"]
+    res["signature"]={
+        "header_text":signature["header_text"],
+        "texts":[i["header"]+" "+"".join(i["texts"]) for i in signature["sections"]]
+    }
+    res["judgement"]={
+        "header_text":judgement["header_text"],
+        "texts":[i["header"]+" "+"".join(i["texts"]) for i in judgement["sections"]]
+    }
+    main_text_sections=detect_header(main_text["sections"],headerChecker)
+    fact_reason_sections=detect_header(fact_reason["sections"],headerChecker)
+    res["main_text"]={
+        "header_text":main_text["header_text"],
+        "sections":main_text_sections
+    }
+    res["fact_reason"]={
+        "header_text":fact_reason["header_text"],
+        "sections":fact_reason_sections
+    }
+    return res
             
 import glob
 import os

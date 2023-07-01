@@ -72,7 +72,6 @@ def main_func(texts:List[str])->Hanrei:
         if header_flg:continue
         aaaaa=t.split()
         if len(aaaaa)>=2:#スペースで区切れる場合、（暫定）セクションとしておく
-            #print(aaaaa)
             if len(text["texts"])>0:res_obj.append(text)
             text={"header":aaaaa[0],"texts":["".join(aaaaa[1:])]}
         else:
