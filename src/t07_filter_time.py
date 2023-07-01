@@ -3,10 +3,9 @@
 import glob
 import os
 import csv
-from typing import List, Tuple, Dict, Set, Optional
+from typing import List, Tuple, Dict, Set, Optional,Union
 import re
 import json
-from typing import List, Tuple, Dict, Set
 import re
 
 def filter_text(text:str,rule)->bool:
@@ -18,7 +17,7 @@ def filter_text(text:str,rule)->bool:
     return False
 
 def export_to_csv(filename: str, data,rule) -> None:
-    csv_result = [["id", "text_id","content"]]
+    csv_result:list[list[Union[int,str]]] = [["id", "text_id","content"]]
     text_id = 0
     for t in data["contents"]:
         if t["header"] == "":

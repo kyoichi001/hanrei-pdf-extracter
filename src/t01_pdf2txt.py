@@ -44,7 +44,7 @@ def pdf_to_cell(path:str)->List[Dict[str,Any]]:
         for index, page in enumerate(PDFPage.create_pages(document)):
             interpreter.process_page(page)
             layout = device.get_result()
-            results = []
+            results:list = []
             get_objs(layout, results)
             result_page={"page":index+1,"contents":results}
             result.append(result_page)
