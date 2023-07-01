@@ -16,18 +16,33 @@ import json
 class Section(TypedDict):
     header:str
     texts:list[str]
+class Chapter(TypedDict):
+    header_text:str
+    sections:list[Section]
+class Hanrei(TypedDict):
+    signature:Chapter
+    judgement:Chapter
+    main_text:Chapter
+    fact_reason:Chapter
 
-def export_to_json(filename:str,data:list[Section])->None:
+def export_to_json(filename:str,data:Hanrei)->None:
     obj={
         "contents":data
     }
     with open(filename, 'w', encoding='utf8', newline='') as f:
         json.dump(obj, f, ensure_ascii=False, indent=2)
 
-def main_func(texts:List[str])->list[Section]:
+def main_func(texts:List[str])->Hanrei:
     text:Section={"header":"","texts":[]}
-    res=[]
+    res:Hanrei={
+        "signature":{"header_text":"","sections":[]},
+        "judgement":{"header_text":"","sections":[]},
+        "main_text":{"header_text":"","sections":[]},
+        "fact_reason":{"header_text":"","sections":[]},
+    }
+    res_obj:list[Section]=[]
     main_section_headers:Final=["判決","主文","事実及び理由"]
+    current_phase=0
     header_file = open("./rules/headers.json", "r", encoding="utf-8")
     headers_obj=json.load(header_file)
     header_others=[rule for rule in headers_obj["rules"] if "order" in rule and rule["order"]==False]
@@ -36,13 +51,21 @@ def main_func(texts:List[str])->list[Section]:
     for t in texts:
         t_=t.replace(" ","").replace("\t","").replace("　","")
         if t_ in main_section_headers:# 主文、事実及び理由の場合
-            res.append(text)
+            res_obj.append(text)
+            if current_phase==0:
+                res["signature"]={"header_text":"","sections":res_obj[:]}
+            elif current_phase==1:
+                res["judgement"]={"header_text":"判決","sections":res_obj[:]}
+            elif current_phase==2:
+                res["main_text"]={"header_text":"主文","sections":res_obj[:]}
             text={"header":t_,"texts":[]}
+            res_obj=[]
+            current_phase+=1
             continue
         header_flg=False
         for h in header_others:
             if re.fullmatch(f"^{h['regex']}",t_) is not None:#〔被告の主張〕などにマッチしたら
-                res.append(text)
+                res_obj.append(text)
                 text={"header":t_,"texts":[]}
                 header_flg=True
                 break
@@ -50,12 +73,14 @@ def main_func(texts:List[str])->list[Section]:
         aaaaa=t.split()
         if len(aaaaa)>=2:#スペースで区切れる場合、（暫定）セクションとしておく
             #print(aaaaa)
-            res.append(text)
+            if len(text["texts"])>0:res_obj.append(text)
             text={"header":aaaaa[0],"texts":["".join(aaaaa[1:])]}
         else:
             text["texts"].append(t)
         count+=1
-    return [i for i in res if i["header"]!=""]
+    res_obj.append(text)
+    res["fact_reason"]={"header_text":"事実及び理由","sections":res_obj[:]}
+    return res
             
 import glob
 import os
