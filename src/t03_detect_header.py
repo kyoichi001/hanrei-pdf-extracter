@@ -46,7 +46,6 @@ def main_func(texts:List[str])->Hanrei:
     header_file = open("./rules/headers.json", "r", encoding="utf-8")
     headers_obj=json.load(header_file)
     header_others=[rule for rule in headers_obj["rules"] if "order" in rule and rule["order"]==False]
-    print(header_others)
     count=0
     for t in texts:
         t_=t.replace(" ","").replace("\t","").replace("　","")
