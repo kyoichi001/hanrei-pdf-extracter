@@ -10,4 +10,5 @@ data/
 json/
 *_hanrei.json
 *_hanrei.csv
+*_hanrei.*.csv
 *_hanrei_*.csv
