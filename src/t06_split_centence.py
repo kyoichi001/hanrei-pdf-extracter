@@ -198,6 +198,7 @@ def export_to_json(filename: str, data) -> None:
                 texts.append({
                     "text_id": text_id,
                     "text": dat["text"],
+                    "raw_text":"".join(text_inputs)
                 })
                 target_text_id = text_id
                 text_id += 1
@@ -222,6 +223,7 @@ def export_to_json(filename: str, data) -> None:
             texts.append({
                 "text_id": text_id,
                 "text": dat["text"],
+                "raw_text":"".join(text_inputs)
             })
             target_text_id = text_id
             text_id += 1
@@ -264,6 +266,7 @@ def export_to_json(filename: str, data) -> None:
                 texts.append({
                     "text_id": text_id,
                     "text": dat["text"],
+                    "raw_text":"".join(text_inputs)
                 })
                 target_text_id = text_id
                 text_id += 1
@@ -288,6 +291,7 @@ def export_to_json(filename: str, data) -> None:
             texts.append({
                 "text_id": text_id,
                 "text": dat["text"],
+                "raw_text":"".join(text_inputs)
             })
             target_text_id = text_id
             text_id += 1
