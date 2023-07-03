@@ -185,8 +185,6 @@ def export_to_json(filename: str, data) -> None:
     target_text_id = 0
     text_id = 0
     for t in main_text["sections"]:
-        if t["header"] == "":
-            continue
         text_inputs = []
         texts = []
         selifs = []
@@ -253,8 +251,6 @@ def export_to_json(filename: str, data) -> None:
     }
     contents=[]
     for t in fact_reason["sections"]:
-        if t["header"] == "":
-            continue
         text_inputs = []
         texts = []
         selifs = []
@@ -310,6 +306,7 @@ def export_to_json(filename: str, data) -> None:
         app_obj = {
             "type": t["type"],
             "header": t["header"],
+            "header_text":t["header_text"]
         }
         if len(texts) != 0:app_obj["texts"] = texts
         if len(selifs) != 0:app_obj["selifs"] = selifs
