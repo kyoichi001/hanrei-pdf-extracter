@@ -180,11 +180,19 @@ def detect_header(sections,headerChecker:HeaderChecker)->List[Any]:
                 current_header=txt_obj
                 texts=t
             else:
+                if len(t)==0:
+                    print(header)
+                    texts.append(header)
+                else:
+                    t[0]=header+t[0]
+                    texts.extend(t)
+        else:
+            if len(t)==0:
+                print(header)
+                texts.append(header)
+            else:
                 t[0]=header+t[0]
                 texts.extend(t)
-        else:
-            t[0]=header+t[0]
-            texts.extend(t)
     res.append({"type":current_header["header_type"],"header":current_header["header"],"texts":texts,"indent":headerList.current_indent()})
     return res
 

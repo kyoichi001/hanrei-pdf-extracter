@@ -9,7 +9,7 @@ y/n
 import glob
 import os
 import csv
-from typing import List, Tuple, Dict, Set,Optional
+from typing import List, Tuple, Dict, Set,Optional,Any
 import re
 import json
 
@@ -32,20 +32,42 @@ def split_blacket(str1:str,str2:str,level:int):
     print("ls :",ls)
     return str1+"".join(ls[:level]),"".join(ls[level:])
 
-def main_func(data):
-    data_count=len(data["contents"])
-    res=[{} for i in range(data_count)]
-    answers:List[str]=[{} for i in range(data_count)]
+def main_func(data)->Tuple[Any,List[str]]:
+    res:Any={
+        "signature":data["contents"]["signature"],
+        "judgement":data["contents"]["judgement"],
+        "main_text":{},
+        "fact_reason":{},
+    }
+    main_text_res={
+        "header_text":data["contents"]["main_text"]["header_text"],
+        "sections":[]
+    }
+    for section in data["contents"]["main_text"]["sections"]:
+        text="".join(section["texts"])
+        main_text_res["sections"].append({
+          "type": section["type"],
+          "header": section["header"],
+          "text": text,
+          "indent": section["indent"],
+        })
+    data_count=len(data["contents"]["fact_reason"]["sections"])
+    res_obj:List[Any]=[{} for i in range(data_count)]
+    answers:List[str]=["" for i in range(data_count)]
     index=0
     while index<data_count:
-        c=data["contents"][index]
+        c=data["contents"]["fact_reason"]["sections"][index]
         if c["type"]=="":
             index+=1
             continue
         flag=""
         header=c["header"]
-        first_line=c["first_line"]
-        text=c["text"]
+        first_line=""
+        text=""
+        if len(c["texts"])>0:
+            first_line=c["texts"][0]
+        if len(c["texts"])>1:
+            text="".join(c["texts"][1:])
         lv=blacket_level(first_line)
         if lv!=0:
             first_line,text=split_blacket(first_line,text,lv)
@@ -66,30 +88,36 @@ def main_func(data):
                 "type": c["type"],
                 "header": header,
                 "header_text":first_line,
-                "text":text
+                "text":text,
+                "indent":c["indent"]
             }
         elif flag=="Y":
             obj={
                 "type": c["type"],
                 "header": header,
                 "header_text":first_line+text,
-                "text":""
+                "text":"",
+                "indent":c["indent"]
             }
         elif flag=="n":
             obj={
                 "type": c["type"],
                 "header": header,
                 "header_text":"",
-                "text":first_line+text
+                "text":first_line+text,
+                "indent":c["indent"]
             }
         elif flag=="u":
             index-=1
             continue
-        res[index]=obj
+        res_obj[index]=obj
         answers[index]=flag
         index+=1
-    res=[i for i in res if "type" in i]
-    answers=[i for i in answers if i!=""]
+    res["main_text"]=main_text_res
+    res["fact_reason"]={
+        "header_text":data["contents"]["fact_reason"]["header_text"],
+        "sections":res_obj
+    }
     return res,answers
 
 def export_to_json(filename:str,contents,answers:List[str])->None:
@@ -110,7 +138,7 @@ def export_to_json(filename:str,contents,answers:List[str])->None:
         writer = csv.writer(f)
         writer.writerow(["id","header","header_text","text"])
         id=0
-        for content in contents:
+        for content in contents["fact_reason"]["sections"]:
             writer.writerow([id,content["header"],content["header_text"],content["text"]])
             id+=1
     

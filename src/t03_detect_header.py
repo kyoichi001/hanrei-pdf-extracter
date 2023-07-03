@@ -57,21 +57,21 @@ def main_func(texts:List[str])->Hanrei:
                 res["judgement"]={"header_text":"判決","sections":res_obj[:]}
             elif current_phase==2:
                 res["main_text"]={"header_text":"主文","sections":res_obj[:]}
-            text={"header":t_,"texts":[]}
+            text={"header":"","texts":[]}
             res_obj=[]
             current_phase+=1
             continue
         header_flg=False
         for h in header_others:
             if re.fullmatch(f"^{h['regex']}",t_) is not None:#〔被告の主張〕などにマッチしたら
-                res_obj.append(text)
+                if len(text["header"])>0:res_obj.append(text)
                 text={"header":t_,"texts":[]}
                 header_flg=True
                 break
         if header_flg:continue
         aaaaa=t.split()
         if len(aaaaa)>=2:#スペースで区切れる場合、（暫定）セクションとしておく
-            if len(text["texts"])>0:res_obj.append(text)
+            if len(text["header"])>0:res_obj.append(text)
             text={"header":aaaaa[0],"texts":["".join(aaaaa[1:])]}
         else:
             text["texts"].append(t)
