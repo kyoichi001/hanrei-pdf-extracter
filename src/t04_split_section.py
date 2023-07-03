@@ -14,9 +14,8 @@ class HanreiSection(TypedDict):
     箇条書きとその内容、その他付加情報
     """
     header:HanreiHeader
-    text:str
+    texts:list[str]
     indent:int
-    first_line:str
 class HeaderRule:
     """
     箇条書きの判定ルール
@@ -161,11 +160,10 @@ def export_to_json(filename:str,data)->None:
         json.dump(obj, f, ensure_ascii=False, indent=2)
 
 def detect_header(sections,headerChecker:HeaderChecker)->List[Any]:
-    text=""
+    texts:list[str]=[]
     current_header:HanreiHeader={"header_type":"","header":""}
     headerList = HeaderList(headerChecker)
     res:List[Any]=[]
-    first_line=""
     for content in sections:
         header=content["header"]
         t=content["texts"]
@@ -173,32 +171,21 @@ def detect_header(sections,headerChecker:HeaderChecker)->List[Any]:
             txt_obj,txt=headerChecker.get_header_type(header)
             #抽出されたテキストが次の箇条書きでかつ、前の文を加味したとき正しいか
             flag1=headerList.is_next_header(txt_obj)
-            flag2=headerChecker.is_collect(txt_obj["header_type"],text)
+            flag2=headerChecker.is_collect(txt_obj["header_type"],"".join(texts))
             #flag3=headerChecker.is_collect2(txt_obj.header,txt)
             if flag1 and flag2:
                 if current_header["header_type"]!="":
-                    res.append({"type":current_header["header_type"],"header":current_header["header"],"first_line":first_line,"text":text,"indent":headerList.current_indent()})
+                    res.append({"type":current_header["header_type"],"header":current_header["header"],"texts":texts,"indent":headerList.current_indent()})
                 headerList.add_header(txt_obj)
                 current_header=txt_obj
-                if len(t)==0: #もしそのヘッダー候補にテキストがなければ、次のヘッダー候補がヘッダーでないとき、その文がfirst_lineになる・・・
-                    first_line=""
-                    text=""
-                else:
-                    first_line=t[0]
-                    text="".join(t[1:])
+                texts=t
             else:
-                if first_line=="" and len(t)>0:
-                    first_line=header+t[0]
-                    text="".join(t[1:])
-                else:
-                    text+=header+"".join(t)
+                t[0]=header+t[0]
+                texts.extend(t)
         else:
-            if first_line=="" and len(t)>0:
-                first_line=header+t[0]
-                text="".join(t[1:])
-            else:
-                text+=header+"".join(t)
-    res.append({"type":current_header["header_type"],"header":current_header["header"],"first_line":first_line,"text":text,"indent":headerList.current_indent()})
+            t[0]=header+t[0]
+            texts.extend(t)
+    res.append({"type":current_header["header_type"],"header":current_header["header"],"texts":texts,"indent":headerList.current_indent()})
     return res
 
 def main_func(contents,headerChecker:HeaderChecker):

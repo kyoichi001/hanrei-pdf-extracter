@@ -3,7 +3,7 @@
 import glob
 import os
 import csv
-from typing import List, Tuple, Dict, Set, Optional,Union
+from typing import List, Tuple, Dict, Set, Optional,Union,Any
 import re
 import json
 import re
@@ -17,11 +17,40 @@ def filter_text(text:str,rule)->bool:
     return False
 
 def export_to_csv(filename: str, data,rule) -> None:
+    res:Any={
+        "signature":data["contents"]["signature"],
+        "judgement":data["contents"]["judgement"],
+        "main_text":{},
+        "fact_reason":{},
+    }
+    main_text=data["contents"]["main_text"]
+    fact_reason=data["contents"]["fact_reason"]
     csv_result:list[list[Union[int,str]]] = [["id", "text_id","content"]]
     text_id = 0
-    for t in data["contents"]:
-        if t["header"] == "":
-            continue
+    for t in main_text["sections"]:
+        print(t)
+        if "texts" in t:
+            for text in t["texts"]:
+                t=text["text"]
+                if filter_text(t,rule):
+                    csv_result.append([text_id,text["text_id"],t])
+                    text_id+=1
+        else:
+            print("👺予期しないエラー")
+            print(t)
+        if "blackets" in t:
+            for text in t["blackets"]:
+                t=text["content"]
+                if filter_text(t,rule):
+                    csv_result.append([text_id,text["text_id"],t])
+                    text_id+=1
+        if "selifs" in t:
+            for text in t["selifs"]:
+                t=text["content"]
+                if filter_text(t,rule):
+                    csv_result.append([text_id,text["text_id"],t])
+                    text_id+=1
+    for t in fact_reason["sections"]:
         print(t)
         if "texts" in t:
             for text in t["texts"]:

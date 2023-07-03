@@ -1,7 +1,7 @@
 import glob
 import os
 import csv
-from typing import List, Tuple, Dict, Set, Optional,Final,Union
+from typing import List, Tuple, Dict, Set, Optional,Final,Union,Any
 import re
 import json
 import re
@@ -56,7 +56,6 @@ def extract_kakko(text: str) -> List[str]:
         res.append(res_wokakko)
     return [i for i in res if i != ""]
 
-
 def split_texts(text: str) -> List[str]:
     def split_text(text: str) -> List[str]:
         a = re.sub("。([^」\\)〕])", "。$\\1", text)
@@ -78,7 +77,6 @@ def split_texts(text: str) -> List[str]:
                 continue
             texts2.append(i)
     return texts2
-
 
 def text_to_data(inputs: List[str]):
     """
@@ -112,13 +110,13 @@ def text_to_data(inputs: List[str]):
         "raw_text":raw_text,
     }
 
-
 def export_to_csv(filename: str, data) -> None:
+    fact_reason=data["contents"]["fact_reason"]
     csv_result:list[list[Union[int,str]]] = [["id", "header", "header_text", "content"]]
     csv_raw_result:list[list[Union[int,str]]] = [["id", "header", "header_text", "content"]]
     text_id = 0
     raw_text_id=0
-    for t in data["contents"]:
+    for t in fact_reason["sections"]:
         if t["header"] == "":
             continue
         if t["text"]=="":
@@ -174,12 +172,19 @@ def export_to_csv(filename: str, data) -> None:
         for row in csv_raw_result:
             writer.writerow(row)
 
-
 def export_to_json(filename: str, data) -> None:
+    res:Any={
+        "signature":data["contents"]["signature"],
+        "judgement":data["contents"]["judgement"],
+        "main_text":{},
+        "fact_reason":{},
+    }
+    main_text=data["contents"]["main_text"]
+    fact_reason=data["contents"]["fact_reason"]
     contents = []
     target_text_id = 0
     text_id = 0
-    for t in data["contents"]:
+    for t in main_text["sections"]:
         if t["header"] == "":
             continue
         text_inputs = []
@@ -238,19 +243,84 @@ def export_to_json(filename: str, data) -> None:
             "type": t["type"],
             "header": t["header"],
         }
-        if len(texts) != 0:
-            app_obj["texts"] = texts
-        if len(selifs) != 0:
-            app_obj["selifs"] = selifs
-        if len(blackets) != 0:
-            app_obj["blackets"] = blackets
+        if len(texts) != 0: app_obj["texts"] = texts
+        if len(selifs) != 0: app_obj["selifs"] = selifs
+        if len(blackets) != 0: app_obj["blackets"] = blackets
         contents.append(app_obj)
-    obj = {
-        "contents": contents
+    res["main_text"]={
+        "header_text":data["contents"]["main_text"]["header_text"],
+        "sections":contents
+    }
+    contents=[]
+    for t in fact_reason["sections"]:
+        if t["header"] == "":
+            continue
+        text_inputs = []
+        texts = []
+        selifs = []
+        blackets = []
+        for i in split_texts(t["text"]):
+            if i[-1] == "。" or i[-1] == "．":
+                text_inputs.append(i)
+                # 文が終わったときにデータを整形し、 text_to_data を呼ぶ
+                dat = text_to_data(text_inputs)
+                # textにtext_idを付与
+                texts.append({
+                    "text_id": text_id,
+                    "text": dat["text"],
+                })
+                target_text_id = text_id
+                text_id += 1
+                # datのselifs, blacketsにtarget_text_idを付与。
+                # selifs, blacketsにtext_idを付与。
+                for selif in dat["selifs"]:
+                    selif["target_text_id"] = target_text_id
+                    selif["text_id"] = text_id
+                    text_id += 1
+                selifs.extend(dat["selifs"])
+                for blacket in dat["blackets"]:
+                    blacket["target_text_id"] = target_text_id
+                    blacket["text_id"] = text_id
+                    text_id += 1
+                blackets.extend(dat["blackets"])
+                text_inputs = []
+            else:
+                text_inputs.append(i)  # 文を蓄積する
+        dat = text_to_data(text_inputs)  # 文が終わったときにデータを整形し、 text_to_data を呼ぶ
+        if dat["text"] != "":
+            # textにtext_idを付与
+            texts.append({
+                "text_id": text_id,
+                "text": dat["text"],
+            })
+            target_text_id = text_id
+            text_id += 1
+            # datのselifs, blacketsにtarget_text_idを付与。
+            # selifs, blacketsにtext_idを付与。
+            for selif in dat["selifs"]:
+                selif["target_text_id"] = target_text_id
+                selif["text_id"] = text_id
+                text_id += 1
+            selifs.extend(dat["selifs"])
+            for blacket in dat["blackets"]:
+                blacket["target_text_id"] = target_text_id
+                blacket["text_id"] = text_id
+                text_id += 1
+            blackets.extend(dat["blackets"])
+        app_obj = {
+            "type": t["type"],
+            "header": t["header"],
+        }
+        if len(texts) != 0:app_obj["texts"] = texts
+        if len(selifs) != 0:app_obj["selifs"] = selifs
+        if len(blackets) != 0:app_obj["blackets"] = blackets
+        contents.append(app_obj)
+    res["fact_reason"]={
+        "header_text":data["contents"]["fact_reason"]["header_text"],
+        "sections":contents
     }
     with open(filename+".json", 'w', encoding='utf8', newline='') as f:
-        json.dump(obj, f, ensure_ascii=False, indent=2)
-
+        json.dump({"contents":res}, f, ensure_ascii=False, indent=2)
 
 def main(inputDir: str, outputDir: str):
     os.makedirs(outputDir, exist_ok=True)
