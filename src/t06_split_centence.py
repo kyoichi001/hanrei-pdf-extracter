@@ -242,6 +242,7 @@ def export_to_json(filename: str, data) -> None:
         app_obj = {
             "type": t["type"],
             "header": t["header"],
+            "indent":t["indent"]
         }
         if len(texts) != 0: app_obj["texts"] = texts
         if len(selifs) != 0: app_obj["selifs"] = selifs
@@ -310,7 +311,8 @@ def export_to_json(filename: str, data) -> None:
         app_obj = {
             "type": t["type"],
             "header": t["header"],
-            "header_text":t["header_text"]
+            "header_text":t["header_text"],
+            "indent":t["indent"]
         }
         if len(texts) != 0:app_obj["texts"] = texts
         if len(selifs) != 0:app_obj["selifs"] = selifs
