@@ -62,41 +62,29 @@ def main_func(data)->Tuple[Any,List[str]]:
             continue
         flag=""
         header=c["header"]
-        first_line=""
-        text=""
-        if len(c["texts"])>0:
-            first_line=c["texts"][0]
-        if len(c["texts"])>1:
-            text="".join(c["texts"][1:])
-        lv=blacket_level(first_line)
-        if lv!=0:
-            first_line,text=split_blacket(first_line,text,lv)
         while True:
             print(f"================== {index} / {data_count} =========================")
             print("header:     ",header)
-            print("first_line: ",first_line)
-            print("text:       ",text)
-            ans = input("これはheader_text? (y(yes) Y(yes(first_line+text)) / n(no) / u(undo))")
-            if ans=="y" or ans=="Y" or ans=="n" or ans=="u":
+            print("texts:\n","\n".join(c["texts"]))
+            ans = input("header_text? (1~9(yes) / n(no) / u(undo))")
+            if ("1"<=ans and ans <="9"):
+                flag=ans
+                if(len(c["texts"])<int(ans)):
+                    print("error out of range")
+                    continue
+                break
+            elif ans=="n" or ans=="u":
                 flag=ans
                 break
             else:
                 print("error やり直し")
         obj={}
-        if flag=="y":
+        if "1"<=ans and ans <="9":
             obj={
                 "type": c["type"],
                 "header": header,
-                "header_text":first_line,
-                "text":text,
-                "indent":c["indent"]
-            }
-        elif flag=="Y":
-            obj={
-                "type": c["type"],
-                "header": header,
-                "header_text":first_line+text,
-                "text":"",
+                "header_text":"".join(c["texts"][:int(ans)]),
+                "text":"".join(c["texts"][int(ans):]),
                 "indent":c["indent"]
             }
         elif flag=="n":
@@ -104,7 +92,7 @@ def main_func(data)->Tuple[Any,List[str]]:
                 "type": c["type"],
                 "header": header,
                 "header_text":"",
-                "text":first_line+text,
+                "text":"".join(c["texts"]),
                 "indent":c["indent"]
             }
         elif flag=="u":

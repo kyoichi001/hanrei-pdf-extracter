@@ -117,6 +117,7 @@ def export_to_csv(filename: str, data) -> None:
     text_id = 0
     raw_text_id=0
     for t in fact_reason["sections"]:
+        if t["text"]==[]:t["text"]=""
         if t["header"] == "":
             continue
         if t["text"]=="":
