@@ -236,7 +236,6 @@ def main(dat):
     headerChecker=HeaderChecker(headers_obj)
 
     data:list=dat["contents"]
-    print(f"入力 {len(data)}行")
     container=main_func(data,headerChecker)
     return {
         "contents":container

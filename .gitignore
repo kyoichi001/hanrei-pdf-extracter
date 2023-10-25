@@ -16,3 +16,4 @@ json/
 build/
 dist/
 .mypy_cache/
+*.spec

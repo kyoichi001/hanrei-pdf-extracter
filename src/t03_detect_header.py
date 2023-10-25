@@ -75,7 +75,6 @@ import os
 
 def main(dat):
     data:list[str]=dat["contents"]
-    print(f"入力 {len(data)}行")
     container=main_func(data)
     return {
         "contents":container

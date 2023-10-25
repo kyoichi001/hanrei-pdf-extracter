@@ -30,7 +30,8 @@ def main_func(data):
             "type":content["type"],
             "header":content["header"],
             "header_text":"",
-            "text":"".join(content["texts"])
+            "text":"".join(content["texts"]),
+                "indent":content["indent"]
         })
     res["main_text"]={
         "header_text":data["contents"]["main_text"]["header_text"],
@@ -42,7 +43,8 @@ def main_func(data):
             "type":content["type"],
             "header":content["header"],
             "header_text":"",
-            "text":"".join(content["texts"])
+            "text":"".join(content["texts"]),
+                "indent":content["indent"]
         })
     res["fact_reason"]={
         "header_text":data["contents"]["fact_reason"]["header_text"],
