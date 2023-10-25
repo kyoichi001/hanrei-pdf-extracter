@@ -13,10 +13,10 @@ from pdfminer.layout import (
     LTTextLine,
 )
 from typing import List, Tuple, Dict, Set, Any
-
+from t01_type import Page,PageContent
 import sys
 
-def get_objs(layout, results:List[Any]):
+def get_objs(layout, results:List[PageContent]):
     if not isinstance(layout, LTContainer):
         return
     for obj in layout:
@@ -28,8 +28,8 @@ def get_objs(layout, results:List[Any]):
                  })
         get_objs(obj, results)
 
-def pdf_to_cell(path:str)->List[Dict[str,Any]]:
-    result:List[Dict[str,Any]]=[]
+def pdf_to_cell(path:str)->List[Page]:
+    result:List[Page]=[]
     with open(path, "rb") as f:
         parser = PDFParser(f)
         document = PDFDocument(parser)
@@ -44,13 +44,13 @@ def pdf_to_cell(path:str)->List[Dict[str,Any]]:
         for index, page in enumerate(PDFPage.create_pages(document)):
             interpreter.process_page(page)
             layout = device.get_result()
-            results:list = []
+            results:list[PageContent] = []
             get_objs(layout, results)
-            result_page={"page":index+1,"contents":results}
+            result_page:Page={"page":index+1,"contents":results}
             result.append(result_page)
     return result
 
-def export_to_json(filename:str,data:List[Any])->None:
+def export_to_json(filename:str,data:List[Page])->None:
     obj={
         "header":{
             "page_count":len(data)

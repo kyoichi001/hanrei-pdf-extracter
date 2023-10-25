@@ -9,8 +9,10 @@ import csv
 from typing import List, Tuple, Dict, Set,Optional,Any
 import re
 import json
+import t01_type
+import t02_type
 
-def export_to_json(filename:str,data:List[Any])->None:
+def export_to_json(filename:str,data:List[str])->None:
     obj={
         "header":{
             "texts_count":len(data)
@@ -23,7 +25,7 @@ def export_to_json(filename:str,data:List[Any])->None:
 def clean_text(txt:str)->str:
     return txt.strip().replace('\n', '').replace('\t', '').replace("（","(").replace("）",")")
 
-def main_func(data):
+def main_func(data:t01_type.Page)->list[str]:
     #yが小さい順（上から下）にソート
     res = sorted(data["contents"],key=lambda x: (-x["y"],x["x"]))
     if len(res)==1:#行番号やページ番号を除外したものを返す
@@ -38,7 +40,6 @@ def main_func(data):
         i+=1
 
     return [clean_text(i["text"]) for i in res if clean_text(i["text"])!="" and re.match('^[-ー \d]+$', i["text"]) == None]
-
             
 import glob
 import os
@@ -50,9 +51,9 @@ def main(inputDir:str,outputDir:str):
     for file in files:
         print(file)
         contents = open(file, "r", encoding="utf-8")
-        pages=json.load(contents)["pages"]
+        pages:List[t01_type.Page]=json.load(contents)["pages"]
         #print(f"入力 {len(contents)}行")
-        output=[]
+        output:list[str]=[]
         for page in pages:
             output.extend(main_func(page))
         output_path=os.path.splitext(os.path.basename(file))[0]

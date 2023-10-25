@@ -6,6 +6,7 @@ import t05_detect_header_text
 import t05_ignore_header_text
 import t06_split_centence
 import t07_filter_time
+import t08_add_extention
 
 print("=====================task 01=====================")
 t01_pdf2txt.main("./pdf","./01")
@@ -23,5 +24,5 @@ t06_split_centence.main("./05","./06")
 print("=====================task 07=====================")
 t07_filter_time.main("./06","./07")
 print("=====================task 08=====================")
-t07_filter_time.main("./06","./08")
+t08_add_extention.main("./06","./08")
 

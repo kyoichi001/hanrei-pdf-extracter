@@ -28,7 +28,7 @@ def export_to_csv(filename: str, data,rule) -> None:
     csv_result:list[list[Union[int,str]]] = [["id", "text_id","content"]]
     text_id = 0
     for t in main_text["sections"]:
-        print(t)
+        #print(t)
         if "texts" in t:
             for text in t["texts"]:
                 t=text["text"]
@@ -51,7 +51,7 @@ def export_to_csv(filename: str, data,rule) -> None:
                     csv_result.append([text_id,text["text_id"],t])
                     text_id+=1
     for t in fact_reason["sections"]:
-        print(t)
+        #print(t)
         if "texts" in t:
             for text in t["texts"]:
                 t=text["text"]

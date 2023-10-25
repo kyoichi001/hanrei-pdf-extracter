@@ -12,35 +12,25 @@ import csv
 from typing import List, Tuple, Dict, Set,Optional,Final,TypedDict
 import re
 import json
+import t02_type
+import t03_type
 
-class Section(TypedDict):
-    header:str
-    texts:list[str]
-class Chapter(TypedDict):
-    header_text:str
-    sections:list[Section]
-class Hanrei(TypedDict):
-    signature:Chapter
-    judgement:Chapter
-    main_text:Chapter
-    fact_reason:Chapter
-
-def export_to_json(filename:str,data:Hanrei)->None:
+def export_to_json(filename:str,data:t03_type.Hanrei)->None:
     obj={
         "contents":data
     }
     with open(filename, 'w', encoding='utf8', newline='') as f:
         json.dump(obj, f, ensure_ascii=False, indent=2)
 
-def main_func(texts:List[str])->Hanrei:
-    text:Section={"header":"","texts":[]}
-    res:Hanrei={
+def main_func(texts:List[str])->t03_type.Hanrei:
+    text:t03_type.Section={"header":"","texts":[]}
+    res:t03_type.Hanrei={
         "signature":{"header_text":"","sections":[]},
         "judgement":{"header_text":"","sections":[]},
         "main_text":{"header_text":"","sections":[]},
         "fact_reason":{"header_text":"","sections":[]},
     }
-    res_obj:list[Section]=[]
+    res_obj:list[t03_type.Section]=[]
     main_section_headers:Final=["判決","主文","事実及び理由"]
     current_phase=0
     header_file = open("./rules/headers.json", "r", encoding="utf-8")
@@ -90,7 +80,7 @@ def main(inputDir:str,outputDir:str):
     for file in files:
         print(file)
         contents = open(file, "r", encoding="utf-8")
-        data:list=json.load(contents)["contents"]
+        data:list[str]=json.load(contents)["contents"]
         print(f"入力 {len(data)}行")
         container=main_func(data)
         output_path=os.path.splitext(os.path.basename(file))[0]
