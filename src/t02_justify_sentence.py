@@ -44,21 +44,15 @@ def main_func(data:t01_type.Page)->list[str]:
 import glob
 import os
 
-def main(inputDir:str,outputDir:str):
-    os.makedirs(outputDir, exist_ok=True)
-    files = glob.glob(f"{inputDir}/*.json")
-
-    for file in files:
-        print(file)
-        contents = open(file, "r", encoding="utf-8")
-        pages:List[t01_type.Page]=json.load(contents)["pages"]
-        #print(f"入力 {len(contents)}行")
-        output:list[str]=[]
-        for page in pages:
-            output.extend(main_func(page))
-        output_path=os.path.splitext(os.path.basename(file))[0]
-        #print(f"出力 {len(container)}行")
-        export_to_json(f"./{outputDir}/{output_path}.json",output)
-
-if __name__=="__main__":
-    main("./01","./02")
+def main(data):
+    pages:List[t01_type.Page]=data["pages"]
+    #print(f"入力 {len(contents)}行")
+    output:list[str]=[]
+    for page in pages:
+        output.extend(main_func(page))
+    return {
+        "header":{
+            "texts_count":len(output)
+        },
+        "contents":output
+    }

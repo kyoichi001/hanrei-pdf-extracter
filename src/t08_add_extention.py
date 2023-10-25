@@ -96,22 +96,6 @@ def export_to_json(filename: str, data) -> None:
     with open(filename+".json", 'w', encoding='utf8', newline='') as f:
         json.dump({"contents":data}, f, ensure_ascii=False, indent=2)
 
-def main(inputDir: str, outputDir: str):
-    os.makedirs(outputDir, exist_ok=True)
-    files = glob.glob(f"{inputDir}/*.json")
-
-    for file in files:
-        print(file)
-        contents = open(file, "r", encoding="utf-8")
-        contents = json.load(contents)
-        # print(contents)
-        #print(f"入力 {len(contents)}行")
-        output_path = os.path.splitext(os.path.basename(file))[0]
-        #print(f"出力 {len(container)}行")
-        res=main_func(contents)
-        export_to_csv(f"{outputDir}/{output_path}", res)
-        export_to_json(f"{outputDir}/{output_path}", res)
-
-
-if __name__ == "__main__":
-    main("./06", "./08")
+def main(dat):
+    res=main_func(dat)
+    return {"contents":res}

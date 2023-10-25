@@ -73,19 +73,10 @@ def main_func(texts:List[str])->t03_type.Hanrei:
 import glob
 import os
 
-def main(inputDir:str,outputDir:str):
-    os.makedirs(outputDir, exist_ok=True)
-    files = glob.glob(f"{inputDir}/*.json")
-
-    for file in files:
-        print(file)
-        contents = open(file, "r", encoding="utf-8")
-        data:list[str]=json.load(contents)["contents"]
-        print(f"入力 {len(data)}行")
-        container=main_func(data)
-        output_path=os.path.splitext(os.path.basename(file))[0]
-        print(f"出力 {len(container)}行")
-        export_to_json(f"{outputDir}/{output_path}.json",container)
-
-if __name__=="__main__":
-    main("./02","./03")
+def main(dat):
+    data:list[str]=dat["contents"]
+    print(f"入力 {len(data)}行")
+    container=main_func(data)
+    return {
+        "contents":container
+    }

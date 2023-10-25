@@ -230,23 +230,15 @@ def main_func(contents,headerChecker:HeaderChecker):
 import glob
 import os
 
-def main(inputDir:str,outputDir:str):
-    os.makedirs(outputDir, exist_ok=True)
-    files = glob.glob(f"{inputDir}/*.json")
-
+def main(dat):
     header_file = open("./rules/headers.json", "r", encoding="utf-8")
     headers_obj=json.load(header_file)
     headerChecker=HeaderChecker(headers_obj)
 
-    for file in files:
-        print(file)
-        contents = open(file, "r", encoding="utf-8")
-        data:list=json.load(contents)["contents"]
-        print(f"入力 {len(data)}行")
-        container=main_func(data,headerChecker)
-        output_path=os.path.splitext(os.path.basename(file))[0]
-        print(f"出力 {len(container)}行")
-        export_to_json(f"{outputDir}/{output_path}.json",container)
+    data:list=dat["contents"]
+    print(f"入力 {len(data)}行")
+    container=main_func(data,headerChecker)
+    return {
+        "contents":container
+    }
 
-if __name__=="__main__":
-    main("./03","./04")

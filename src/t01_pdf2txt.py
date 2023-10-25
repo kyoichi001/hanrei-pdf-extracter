@@ -64,13 +64,11 @@ import glob
 import os
 import json
 
-def main(inputDir:str,outputDir:str):
-    os.makedirs(outputDir, exist_ok=True)
-    files = glob.glob(f"{inputDir}/*.pdf")
-    for file in files:
-        print(file)
-        output_path=os.path.splitext(os.path.basename(file))[0]
-        export_to_json(f"./{outputDir}/{output_path}.json",pdf_to_cell(file))
-
-if __name__=="__main__":
-    main("./pdf","./01")
+def main(path):
+    data=pdf_to_cell(path)
+    return {
+        "header":{
+            "page_count":len(data)
+        },
+        "pages":data
+    }
