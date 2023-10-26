@@ -229,9 +229,10 @@ def main_func(contents,headerChecker:HeaderChecker):
             
 import glob
 import os
-
+import sys 
 def main(dat):
-    header_file = open("./rules/headers.json", "r", encoding="utf-8")
+    exe_dir=os.path.dirname(sys.argv[0])
+    header_file = open(f"{exe_dir}/rules/headers.json", "r", encoding="utf-8")
     headers_obj=json.load(header_file)
     headerChecker=HeaderChecker(headers_obj)
 

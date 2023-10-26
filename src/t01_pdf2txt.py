@@ -30,6 +30,7 @@ def get_objs(layout, results:List[PageContent]):
 
 def pdf_to_cell(path:str)->List[Page]:
     result:List[Page]=[]
+    print(f"read {path}")
     with open(path, "rb") as f:
         parser = PDFParser(f)
         document = PDFDocument(parser)
@@ -66,6 +67,7 @@ import json
 
 def main(path):
     data=pdf_to_cell(path)
+    print("phase 1 converted")
     return {
         "header":{
             "page_count":len(data)

@@ -14,6 +14,7 @@ import re
 import json
 import t02_type
 import t03_type
+import sys
 
 def export_to_json(filename:str,data:t03_type.Hanrei)->None:
     obj={
@@ -33,7 +34,8 @@ def main_func(texts:List[str])->t03_type.Hanrei:
     res_obj:list[t03_type.Section]=[]
     main_section_headers:Final=["判決","主文","事実及び理由"]
     current_phase=0
-    header_file = open("./rules/headers.json", "r", encoding="utf-8")
+    exe_dir=os.path.dirname(sys.argv[0])
+    header_file = open(f"{exe_dir}/rules/headers.json", "r", encoding="utf-8")
     headers_obj=json.load(header_file)
     header_others=[rule for rule in headers_obj["rules"] if "order" in rule and rule["order"]==False]
     count=0
