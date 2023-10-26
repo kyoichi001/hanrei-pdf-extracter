@@ -13,10 +13,9 @@ from pdfminer.layout import (
     LTTextLine,
 )
 from typing import List, Tuple, Dict, Set, Any
-from t01_type import Page,PageContent
 import sys
 
-def get_objs(layout, results:List[PageContent]):
+def get_objs(layout, results:List):
     if not isinstance(layout, LTContainer):
         return
     for obj in layout:
@@ -28,9 +27,14 @@ def get_objs(layout, results:List[PageContent]):
                  })
         get_objs(obj, results)
 
-def pdf_to_cell(path:str)->List[Page]:
-    result:List[Page]=[]
+def pdf_to_cell(path:str):
+    import os
+    result=[]
+    if not os.path.isfile(path):
+        print(f"{path} could not loaded")
+        return None
     print(f"read {path}")
+
     with open(path, "rb") as f:
         parser = PDFParser(f)
         document = PDFDocument(parser)
@@ -45,28 +49,22 @@ def pdf_to_cell(path:str)->List[Page]:
         for index, page in enumerate(PDFPage.create_pages(document)):
             interpreter.process_page(page)
             layout = device.get_result()
-            results:list[PageContent] = []
+            results:list = []
             get_objs(layout, results)
-            result_page:Page={"page":index+1,"contents":results}
+            result_page={"page":index+1,"contents":results}
             result.append(result_page)
     return result
 
-def export_to_json(filename:str,data:List[Page])->None:
-    obj={
-        "header":{
-            "page_count":len(data)
-        },
-        "pages":data
-    }
-    with open(filename, 'w', encoding='utf8', newline='') as f:
-        json.dump(obj, f, ensure_ascii=False, indent=2)
-
-import glob
-import os
-import json
-
 def main(path):
     data=pdf_to_cell(path)
+    if data is None:
+        print("file not found")
+        return {
+        "header":{
+            "page_count":0
+        },
+        "pages":[]
+    }
     print("phase 1 converted")
     return {
         "header":{
@@ -74,3 +72,15 @@ def main(path):
         },
         "pages":data
     }
+
+def export_to_json(filename:str,data)->None:
+    import json
+    with open(filename, 'w', encoding='utf8', newline='') as f:
+        json.dump(data, f, ensure_ascii=False, indent=2)
+
+inputPath = sys.argv[1]
+outputPath = sys.argv[2]
+
+res=main(inputPath)
+print("system completed")
+export_to_json(outputPath,res)
